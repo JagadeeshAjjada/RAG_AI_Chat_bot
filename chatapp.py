@@ -28,6 +28,24 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 ])
 logger = logging.getLogger(__name__)
 
+
+def simulate_typing(text, placeholder, typing_speed=0.0001):
+    """
+    Simulates typing animation for assistant response.
+
+    Args:
+        text (str): The full text of the response.
+        placeholder (st.empty): Streamlit placeholder to update the text.
+        typing_speed (float): Delay between displaying each character (in seconds).
+    """
+    typed_text = ""
+    for char in text:
+        typed_text += char
+        placeholder.markdown(f"{typed_text}")
+        time.sleep(typing_speed)
+    placeholder.markdown(f"{text}")  # Ensure the full response is displayed
+
+
 # Function to extract text from PDFs
 def get_doc_text(docs):
     logger.info("Extracting text from uploaded Files...")
@@ -148,9 +166,6 @@ def main():
                     st.session_state.messages = chat.copy()  # Load selected chat history
                     st.session_state.active_chat_index = i  # Set the active chat index
                     st.rerun()  # <-- CHANGED FROM st.experimental_rerun() TO st.rerun()
-        # st.write("___")
-        # st.image("img/Robot.jpg")
-        # st.write("AI App created by @ Jagadeesh Ajjada")
 
     # Display existing chat messages
     for message in st.session_state.messages:
@@ -184,7 +199,11 @@ def main():
         if st.session_state.active_chat_index is not None:
             st.session_state.chat_history[st.session_state.active_chat_index] = st.session_state.messages.copy()
 
-        st.write(response)
+        # Display assistant's response with typing animation
+        with st.chat_message("assistant"):
+            # st.write(response)
+            placeholder = st.empty()  # Placeholder for typing effect
+            simulate_typing(response, placeholder, typing_speed=0.0001)
 
     st.markdown("""
         <div style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #0E1117; padding: 15px; text-align: center;">
